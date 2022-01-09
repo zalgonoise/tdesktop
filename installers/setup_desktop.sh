@@ -108,6 +108,29 @@ function getOpenboxStyles() {
     
 }
 
+# non-interactive VNC setup
+function autoVNC() {
+    mkdir -p ${HOME}/.vnc
+    echo ${vncPassword} | vncpasswd -f > ${HOME}/.vnc/passwd
+    chmod 0600 ${HOME}/.vnc/passwd
+}
+
+
+# initialize input arguments (if any)
+if ! [[ ${1} == "none" ]]; then
+    desktopMode=${1}
+else
+    desktopMode=""
+fi
+
+if [[ ${2} ]]; then
+    vncPassword=${2}
+else
+    vncPassword=""
+fi
+
+
+
 
 # non-destructive backup before initializing
 say "backing up existing rc files"
@@ -148,11 +171,28 @@ say "adding X11 repo"
 
 # install VNC server, QTerminal and Netsurf
 say "installing VNC server and GUI tools"
-say "select a desktop environment to install:"
+if [[ -z ${desktopMode} ]]; then
+    say "select a desktop environment to install:"
 
-deOpt=""
-select de in ${desktopEnvs[@]}; do
-    case ${de} in
+    deOpt=""
+    select de in ${desktopEnvs[@]}; do
+        case ${de} in
+            ${desktopEnvs[0]})                                                         # "XFCE"
+                packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ; break ;;
+            ${desktopEnvs[1]})                                                         # "Openbox"
+                packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]} ; break ;;
+            ${desktopEnvs[2]})                                                         # "LXQt"
+                packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]} ; break ;;
+            ${desktopEnvs[3]})                                                         # "MATE"
+                packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]} ; break ;;
+            ${desktopEnvs[4]})                                                         # "Fluxbox"
+                packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ; break ;;
+            *)
+                err "invalid option: ${REPLY}" ;;
+        esac
+    done
+else 
+    case ${desktopMode} in
         ${desktopEnvs[0]})                                                         # "XFCE"
             packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ; break ;;
         ${desktopEnvs[1]})                                                         # "Openbox"
@@ -164,9 +204,12 @@ select de in ${desktopEnvs[@]}; do
         ${desktopEnvs[4]})                                                         # "Fluxbox"
             packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ; break ;;
         *)
-            err "invalid option: ${REPLY}" ;;
+            err "invalid option: ${desktopMode}" ;;
     esac
-done
+fi
+
+
+
 {
     apt install -y ${packageList[@]} ;
 } && {
@@ -176,9 +219,13 @@ done
 }
 
 # setup VNC server
-say "first-time setup for VNC; enter a password when prompted"
-vncserver -localhost # asks for password to setup
-vncserver -kill :1
+if [[ -z ${vncPassword} ]]; then
+    say "first-time setup for VNC; enter a password when prompted"
+    vncserver -localhost # asks for password to setup
+    vncserver -kill :1
+else
+    autoVNC
+fi
 
 # prepare VNC startup script 
         cat << EOF > ${HOME}/.vnc/xstartup

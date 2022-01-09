@@ -25,6 +25,22 @@ verificationCmd=(
     "tmux"
 )
 
+desktopEnvs=(
+    "XFCE"
+    "Openbox"
+    "LXQt"
+    "MATE"
+    "Fluxbox"
+)
+
+desktopEnvsLC=(
+    "xfce"
+    "openbox"
+    "lxqt"
+    "mate"
+    "fluxbox"
+)
+
 # default echo function
 function say() {
     echo -e "[tde]\t$*"
@@ -46,7 +62,7 @@ function warn() {
 function run() {
     say "installing ${1}"
     {
-        (./installers/${2}) ;
+        (./installers/${2} ${3} ${4}) ;
     } && {
         say "${1} installed successfully"
     } || {
@@ -110,24 +126,41 @@ function installTDE() {
     getExtras=0
     getAll=0
 
-    for i in ${opts}; do
-        if [[ ${i} == "all" ]]; then
+    desktopMode="none"
+    vncPassword=""
+
+    say "parsing install options: ${opts[@]}"
+
+    for (( i=0 ; i<${#opts[@]} ; i++ )); do
+        if [[ ${opts[i]} == "all" ]]; then
             say "set to install all packages"
             getAll=1
         fi
-        if [[ ${i} == "desktop" ]]; then
+        if [[ ${opts[i]} == "desktop" ]]; then
             say "set to install desktop packages"
             getDesktop=1
         fi
-        if [[ ${i} == "shell" ]]; then
+        if [[ ${opts[i]} == "shell" ]]; then
             say "set to install shell packages"
             getShell=1
         fi
-        if [[ ${i} == "extras" ]]; then
+        if [[ ${opts[i]} == "extras" ]]; then
             say "set to install extra packages"
             getExtras=1
         fi
+
+        for (( e=0 ; e<${#desktopEnvs[@]} ; e++ )); do
+            if [[ ${opts[i]} == ${desktopEnvs[e]} ]] \
+            || [[ ${opts[i]} == ${desktopEnvsLC[e]} ]]; then
+                getDesktop=1
+                desktopMode=${desktopEnvs[e]}
+            fi
+        done
     done
+
+    if [[ ${VNCPASSWD} ]]; then
+        vncPassword=${VNCPASSWD}
+    fi
 
     checkBaseTools
 
@@ -139,7 +172,7 @@ function installTDE() {
         fi
 
         if [[ ${getDesktop} == 1 ]]; then
-            run "desktop" "setup_desktop.sh"
+            run "desktop" "setup_desktop.sh" "${desktopMode}" "${vncPassword}"
         fi
 
         if [[ ${getShell} == 1 ]]; then
