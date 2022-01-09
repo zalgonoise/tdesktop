@@ -15,13 +15,15 @@ desktopEnvs=(
 
 packageList=(
     "tigervnc"
-    "qterminal"
+    "xfce4-terminal"
     "netsurf"
+    "geany"
+    "thunar"
 )
 
 desktopEnvPkgs=(
     "xfce4"
-    "openbox pypanel xorg-xsetroot"
+    "openbox tint2 rofi python3 feh xfce4-settings polybar ncmpcpp"
     "lxqt"
     "mate-* marco"
     "fluxbox"
@@ -45,6 +47,7 @@ function warn() {
     echo -e "-----\n[tde][WARN]\t$*\n-----"
 }
 
+# default backup function
 function backup() {
     array=( $@ )
 
@@ -58,6 +61,53 @@ function backup() {
 
     done
 }
+
+
+# import openbox styles from https://github.com/adi1090x/termux-desktop
+function getOpenboxStyles() {
+    mkdir -p ~/.config
+
+    cd ${PREFIX}/tmp ;
+    {
+        git clone https://github.com/adi1090x/termux-desktop \
+        && cd termux-desktop/files ;
+    } && {
+        say "fetched adi1090x/termux-desktop openbox styles"
+    } || {
+        err "failed to get adi1090x/termux-desktop openbox styles"
+    }
+
+    reqConfig=(
+        ".config/geany"
+        ".config/gtk-3.0"
+        ".config/netsurf"
+        ".config/openbox"
+        ".config/polybar"
+        ".config/rofi"
+        ".config/Thunar"
+        ".config/xfce4"        
+    )
+
+    reqItems=(
+        ".fehbg"
+        ".fonts"
+        ".gtkrc-2.0"
+        ".icons"
+        ".local"
+        ".mpd"
+        ".ncmpcpp"
+        ".themes"               
+    )
+
+    cp -r ${reqItems[@]} ${HOME}/
+    cp -r ${reqConfig[@]} ${HOME}/.config/
+    cd ${PREFIX}/tmp 
+    rm -rf termux-desktop
+
+    cd ${pwd}
+    
+}
+
 
 # non-destructive backup before initializing
 say "backing up existing rc files"
@@ -151,17 +201,7 @@ EOF
         cat << EOF >> ${HOME}/.vnc/xstartup
 openbox-session &
 EOF
-        mkdir -p ${HOME}/.config/openbox
-        cat << EOF >> ${HOME}/.config/openbox/autostart
-export DISPLAY=localhost:0
-
-# Make background gray.
-xsetroot -solid gray
-
-# Launch PyPanel.
-pypanel &
-EOF
-        chmod +x ${HOME}/.config/openbox/autostart
+        getOpenboxStyles 
         ;;
     ${desktopEnvs[2]})                      # "LXQt"
         say "setting up VNC config for ${desktopEnvs[2]}"
@@ -189,129 +229,6 @@ esac
 
 chmod +x ${HOME}/.vnc/xstartup
 say "vnc service is configured"
-
-# setting up qterminal config
-say "setting up qterminal config"
-{
-    mkdir -p ${HOME}/.config/qterminal \
-    && cat << EOF > ${HOME}/.config/qterminal/qterminal.ini
-[General]
-AskOnExit=true
-BoldIntense=true
-BookmarksFile=/data/data/com.termux/files/home/.config/qterminal.org/qterminal_bookmarks.xml
-BookmarksVisible=true
-Borderless=false
-ChangeWindowIcon=true
-ChangeWindowTitle=true
-CloseTabOnMiddleClick=true
-ConfirmMultilinePaste=false
-DisableBracketedPasteMode=false
-FixedTabWidth=true
-FixedTabWidthValue=500
-HandleHistory=
-HideTabBarWithOneTab=true
-HistoryLimited=true
-HistoryLimitedTo=1000
-KeyboardCursorShape=0
-LastWindowMaximized=false
-MenuVisible=true
-MotionAfterPaste=2
-NoMenubarAccel=true
-OpenNewTabRightToActiveTab=false
-PrefDialogSize=@Size(700 539)
-SavePosOnExit=true
-SaveSizeOnExit=true
-ScrollbarPosition=2
-ShowCloseTabButton=false
-TabBarless=true
-TabsPosition=0
-Term=xterm-256color
-TerminalBackgroundImage=
-TerminalBackgroundMode=0
-TerminalMargin=0
-TerminalTransparency=0
-TerminalsPreset=0
-TrimPastedTrailingNewlines=false
-UseBookmarks=false
-UseCWD=false
-UseFontBoxDrawingChars=false
-colorScheme=BreezeModified
-emulation=default
-enabledBidiSupport=true
-fontFamily=Monospace
-fontSize=12
-guiStyle=
-highlightCurrentTerminal=false
-showTerminalSizeHint=true
-version=0.17.0
-
-[DropMode]
-Height=45
-KeepOpen=false
-ShortCut=F12
-ShowOnStart=true
-Width=70
-
-[MainWindow]
-ApplicationTransparency=25
-fixedSize=@Size(600 400)
-pos=@Point(47 53)
-size=@Size(600 420)
-state=@ByteArray(\0\0\0\xff\0\0\0\0\xfd\0\0\0\x1\0\0\0\0\0\0\0\0\0\0\0\0\xfc\x2\0\0\0\x1\xfb\0\0\0&\0\x42\0o\0o\0k\0m\0\x61\0r\0k\0s\0\x44\0o\0\x63\0k\0W\0i\0\x64\0g\0\x65\0t\0\0\0\0\0\xff\xff\xff\xff\0\0\0s\0\xff\xff\xff\0\0\x2X\0\0\x1\x90\0\0\0\x4\0\0\0\x4\0\0\0\b\0\0\0\b\xfc\0\0\0\0)
-
-[Sessions]
-size=0
-
-[Shortcuts]
-Add%20Tab=Ctrl+Shift+T
-Bottom%20Subterminal=Alt+Down
-Clear%20Active%20Terminal=Ctrl+Shift+X
-Close%20Tab=Ctrl+Shift+W
-Collapse%20Subterminal=
-Copy%20Selection=Ctrl+Shift+C
-Find=Ctrl+Shift+F
-Fullscreen=F11
-Handle%20history=
-Hide%20Window%20Borders=
-Left%20Subterminal=Alt+Left
-Move%20Tab%20Left=Alt+Shift+Left|Ctrl+Shift+PgUp
-Move%20Tab%20Right=Alt+Shift+Right|Ctrl+Shift+PgDown
-New%20Window=Ctrl+Shift+N
-Next%20Tab=Ctrl+PgDown
-Next%20Tab%20in%20History=Ctrl+Shift+Tab
-Paste%20Clipboard=Ctrl+Shift+V
-Paste%20Selection=Shift+Ins
-Preferences...=
-Previous%20Tab=Ctrl+PgUp
-Previous%20Tab%20in%20History=Ctrl+Tab
-Quit=
-Rename%20Session=Alt+Shift+S
-Right%20Subterminal=Alt+Right
-Show%20Tab%20Bar=
-Split%20Terminal%20Horizontally=
-Split%20Terminal%20Vertically=
-Tab%201=
-Tab%2010=
-Tab%202=
-Tab%203=
-Tab%204=
-Tab%205=
-Tab%206=
-Tab%207=
-Tab%208=
-Tab%209=
-Toggle%20Bookmarks=Ctrl+Shift+B
-Toggle%20Menu=Ctrl+Shift+M
-Top%20Subterminal=Alt+Up
-Zoom%20in=Ctrl++
-Zoom%20out=Ctrl+-
-Zoom%20reset=Ctrl+0
-EOF
-} && {
-    say "qterminal setup successfully"
-} || {
-    warn "unable to configure qterminal -- most likely running defaults"
-}
 
 # setting up symlinks for executable
 say "setting up symlink for the launcher script, on ~/.local/bin"

@@ -3,6 +3,10 @@
 # default "need to login" variable
 relog=0
 
+baseTools=(
+    "git"
+)
+
 affectedPackages=(
     "xfce4"
     "tigervnc"
@@ -50,15 +54,17 @@ function run() {
     }
 }
 
-# check and install git (if not yet installed)
-function checkGit() {
-    say "checking if git is installed"
-    if [[ -z $(command -v git) ]]; then
-        say "git isn't installed -- installing git"
-        apt update -y 
-        apt install git -y
-    fi
-    say "git is installed"
+# check and install base tools (if not yet installed)
+function checkBaseTools() {
+    for tool in ${baseTools[@]}; do
+        say "checking if ${tool} is installed"
+        if [[ -z $(command -v ${tool}) ]]; then
+            say "git isn't installed -- installing ${tool}"
+            apt update -y 
+            apt install ${tool} -y
+        fi
+        say "${tool} is installed"
+    done
 }
 
 # default usage function
@@ -123,7 +129,7 @@ function installTDE() {
         fi
     done
 
-    checkGit
+    checkBaseTools
 
     if [[ ${getAll} == 0 ]]; then
         if [[ ${getDesktop} == 0 ]] \
