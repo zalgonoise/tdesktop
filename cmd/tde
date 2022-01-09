@@ -70,14 +70,22 @@ if [[ -z $(command -v vncserver) ]]; then
     err "package vncserver is not installed, or not found in \${PATH}"
 fi
 
-if [[ -z $(command -v xfce4-session) ]]; then
-    err "package xfce4 is not installed, or not found in \${PATH}"
+if [[ -z $(command -v xfce4-session) ]] \
+&& [[ -z $(command -v openbox-session) ]] \
+&& [[ -z $(command -v lxqt-session) ]] \
+&& [[ -z $(command -v mate-session) ]] \
+&& [[ -z $(command -v fluxbox) ]]; then
+    err "desktop environment is not installed, or not found in \${PATH}"
 fi
 
 say "checking required config"
 # Check if ~/.vnc/xstartup is ready to load xfce
-if [[ -z $(grep 'xfce4-session &' ${HOME}/.vnc/xstartup) ]]; then
-    warn "vnc server is not configured to load xfce"
+if [[ -z $(grep 'xfce4-session &' ${HOME}/.vnc/xstartup) ]] \
+&& [[ -z $(grep 'openbox-session &' ${HOME}/.vnc/xstartup) ]] \
+&& [[ -z $(grep 'lxqt-session &' ${HOME}/.vnc/xstartup) ]] \
+&& [[ -z $(grep 'mate-session &' ${HOME}/.vnc/xstartup) ]] \
+&& [[ -z $(grep 'fluxbox &' ${HOME}/.vnc/xstartup) ]]; then
+    warn "vnc server is not configured to load desktop environment"
 fi
 
 # Validate user input

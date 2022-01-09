@@ -149,7 +149,9 @@ function installTDE() {
         && run "extras" "setup_extras.sh"
     fi 
 
-    if [[ ${getAll} == 1 ]] || [[ ${getShell} == 1 ]]; then
+    if [[ ${getAll} == 1 ]] \
+    || [[ ${getDesktop} == 1 ]] \
+    || [[ ${getShell} == 1 ]]; then
         relog=1
     fi
 

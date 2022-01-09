@@ -5,13 +5,28 @@ sensitiveFiles=(
     ".config"       # .config folder for desktop apps
 )
 
-#TODO: DE options (xfce, openbox, etc)
+desktopEnvs=(
+    "XFCE"
+    "Openbox"
+    "LXQt"
+    "MATE"
+    "Fluxbox"
+)
+
 packageList=(
-    "xfce4"         
     "tigervnc"
     "qterminal"
     "netsurf"
 )
+
+desktopEnvPkgs=(
+    "xfce4"
+    "openbox pypanel xorg-xsetroot"
+    "lxqt"
+    "mate-* marco"
+    "fluxbox"
+)
+
 
 # default echo function
 function say() {
@@ -82,8 +97,26 @@ say "adding X11 repo"
 
 
 # install VNC server, QTerminal and Netsurf
-# TODO: add options for different DEs
 say "installing VNC server and GUI tools"
+say "select a desktop environment to install:"
+
+deOpt=""
+select de in ${desktopEnvs[@]}; do
+    case ${de} in
+        ${desktopEnvs[0]})                                                         # "XFCE"
+            packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ; break ;;
+        ${desktopEnvs[1]})                                                         # "Openbox"
+            packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]} ; break ;;
+        ${desktopEnvs[2]})                                                         # "LXQt"
+            packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]} ; break ;;
+        ${desktopEnvs[3]})                                                         # "MATE"
+            packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]} ; break ;;
+        ${desktopEnvs[4]})                                                         # "Fluxbox"
+            packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ; break ;;
+        *)
+            err "invalid option: ${REPLY}" ;;
+    esac
+done
 {
     apt install -y ${packageList[@]} ;
 } && {
@@ -98,14 +131,62 @@ vncserver -localhost # asks for password to setup
 vncserver -kill :1
 
 # prepare VNC startup script 
-cat << EOF > ${HOME}/.vnc/xstartup
+        cat << EOF > ${HOME}/.vnc/xstartup
 #!/data/data/com.termux/files/usr/bin/sh
 ## This file is executed during VNC server
 ## startup.
 
+EOF
+
+case ${deOpt} in
+    ${desktopEnvs[0]})                      # "XFCE"
+        say "setting up VNC config for ${desktopEnvs[0]}"
+        cat << EOF >> ${HOME}/.vnc/xstartup
 xrdb ${HOME}/.Xresourcesw
 xfce4-session & 
 EOF
+        ;;
+    ${desktopEnvs[1]})                      # "Openbox"
+        say "setting up VNC config for ${desktopEnvs[1]}"
+        cat << EOF >> ${HOME}/.vnc/xstartup
+openbox-session &
+EOF
+        mkdir -p ${HOME}/.config/openbox
+        cat << EOF >> ${HOME}/.config/openbox/autostart
+export DISPLAY=localhost:0
+
+# Make background gray.
+xsetroot -solid gray
+
+# Launch PyPanel.
+pypanel &
+EOF
+        chmod +x ${HOME}/.config/openbox/autostart
+        ;;
+    ${desktopEnvs[2]})                      # "LXQt"
+        say "setting up VNC config for ${desktopEnvs[2]}"
+        cat << EOF >> ${HOME}/.vnc/xstartup
+lxqt-session &
+EOF
+        ;;
+    ${desktopEnvs[3]})                      # "MATE"
+        say "setting up VNC config for ${desktopEnvs[3]}"
+        cat << EOF >> ${HOME}/.vnc/xstartup
+mate-session &
+EOF
+        ;;
+    ${desktopEnvs[4]})                      # "Fluxbox"
+        say "setting up VNC config for ${desktopEnvs[4]}"
+        cat << EOF >> ${HOME}/.vnc/xstartup
+# Generate menu
+fluxbox-generate_menu
+
+# Start fluxbox
+fluxbox &
+EOF
+        ;;
+esac
+
 chmod +x ${HOME}/.vnc/xstartup
 say "vnc service is configured"
 
