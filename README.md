@@ -54,3 +54,16 @@ __Removal instructions__
 
 
 > Note: work-in-progress; although functional, this repo will suffer changes in the near future.
+
+
+____________________________________
+
+__Non-interactive installation__
+
+You're able to install a desktop environment in one-shot by defining a environment variable for your VNC password (as `VNCPASSWD`) and targetting a specific (supported) desktop environment, as such:
+
+```
+VNCPASSWD=tdesktop ./tdesktop/setup_tde.sh install openbox
+```
+
+This command will run the installation script __without__ prompting you for a VNC password (it takes the one set in `VNCPASSWD`) and will not prompt you to pick a desktop environment. The installation process will run on its own from start to finish, logging all progress and any errors. 
