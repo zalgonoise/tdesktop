@@ -1,0 +1,115 @@
+#!/data/data/com.termux/files/usr/bin/bash
+#
+# tdesktop startup script
+
+# default echo function
+function say() {
+    echo -e "[tde]\t$*"
+
+}
+
+# default error function
+function err() {
+    echo -e "-----\n[tde][ERROR]\t$*\n-----"
+    exit 1
+}
+
+# default warn function
+function warn() {
+    echo -e "-----\n[tde][WARN]\t$*\n-----"
+}
+
+# default function to kill all vnc servers
+function vncKill() {
+    # Check if there are on-going vnc servers
+    # terminate them if existing
+    pids=( 
+        $(find ${HOME}/.vnc -type f -name "*.pid" -exec cat {} \;)
+    )
+
+    if [[ ${#pids[@]} > 0 ]]; then
+
+        for (( i=0 ; i<${#pids[@]} ; i++ )); do
+            say "killing PID ${pids[i]}"
+            kill ${pids[i]}
+        done
+        rm ${HOME}/.vnc/*.pid
+    
+    fi
+}
+
+# initialize regex verification vars
+regexDisplay='^[0-9]{1,2}$'
+regexGeometry='^[0-9]{3,4}x[0-9]{3,4}$'
+regexBitDepth='^8|16|32$'
+
+# catcher for kill / stop command
+if [[ ${1} == "kill" ]] || [[ ${1} == "-kill" ]] || [[ ${1} == "--kill" ]] \
+|| [[ ${1} == "stop" ]] || [[ ${1} == "-stop" ]] || [[ ${1} == "--stop" ]]; then
+    say "received kill signal; stopping vnc servers"
+    {
+        vncKill ;
+    } || {
+        err "error terminating vnc servers" ;
+        exit 1
+    }
+    say "vnc servers terminated successfully" ;
+    exit 0
+fi
+
+
+# input variables 
+display=${1:-"1"}
+geometry=${2:-"1024x768"}
+bitDepth=${3:-"32"}
+
+say "checking required packages"
+# Check if essential X11 packages are installed
+# and if files are configured correctly
+if [[ -z $(command -v vncserver) ]]; then
+    err "package vncserver is not installed, or not found in \${PATH}"
+fi
+
+if [[ -z $(command -v xfce4-session) ]]; then
+    err "package xfce4 is not installed, or not found in \${PATH}"
+fi
+
+say "checking required config"
+# Check if ~/.vnc/xstartup is ready to load xfce
+if [[ -z $(grep 'xfce4-session &' ${HOME}/.vnc/xstartup) ]]; then
+    warn "vnc server is not configured to load xfce"
+fi
+
+# Validate user input
+if ! [[ ${display} =~ ${regexDisplay} ]]; then
+    err "invalid input for the display value: ${display} -- must be a number, up to two digits"
+fi
+
+if ! [[ ${geometry} =~ ${regexGeometry} ]]; then
+    err "invalid input for the geometry value: ${geometry} -- enter a valid format such as 1024x768 or 800x600"
+fi
+
+if ! [[ ${bitDepth} =~ ${regexBitDepth} ]]; then
+    err "invalid input for the bit depth value: ${bitDepth} -- must be either: 8, 16 or 32"
+fi
+
+
+# kill all vnc servers
+say "stopping any existing vnc servers"
+{
+    vncKill ;
+} || {
+    err "error terminating vnc servers" ;
+}
+say "vnc servers terminated successfully" ;
+
+
+# start a new vnc server 
+say "setting up vnc server on display :${display} -- geometry: ${geometry} -- bit depth: ${bitDepth}"
+{
+    vncserver -geometry ${geometry} -depth ${bitDepth} :${display} ;
+} && {
+    say "vnc server started successfully" ;
+} || {
+    err "unable to start vnc server" ;
+}
