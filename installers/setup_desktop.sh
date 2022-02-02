@@ -22,8 +22,8 @@ packageList=(
 )
 
 desktopEnvPkgs=(
-    "xfce4"
-    "openbox tint2 rofi python3 feh xfce4-settings polybar ncmpcpp"
+    "xfce4 dbus"
+    "openbox tint2 rofi python3 feh xfce4-settings polybar ncmpcpp dbus"
     "lxqt"
     "mate-* marco"
     "fluxbox"
@@ -113,6 +113,24 @@ function autoVNC() {
     mkdir -p ${HOME}/.vnc
     echo ${vncPassword} | vncpasswd -f > ${HOME}/.vnc/passwd
     chmod 0600 ${HOME}/.vnc/passwd
+}
+
+# check / generate /etc/machine-id
+function checkUUID() {
+    say "checking if /etc/machine-id exists"
+    if [[ $(find ${PREFIX}/etc/ -type f -name machine-id | wc -l) == 0 ]]; then
+        {
+            dbus-uuidgen --ensure=/data/data/com.termux/files/usr/etc/machine-id
+        } && {
+            machineUUID=$(cat ${PREFIX}/etc/machine-id)
+            say "generated machine UUID successfully: ${machineUUID}"
+        } || {
+            warn "failed to generate machine UUID; xfce4-settings-manager may not work as intended"
+        }            
+    else
+        machineUUID=$(cat ${PREFIX}/etc/machine-id)
+        say "found existing machine UUID: ${machineUUID}"
+    fi
 }
 
 
@@ -217,6 +235,17 @@ fi
 } || {
     err "failed to install packages: ${packageList[@]}" ;
 }
+
+# generate /etc/machine-id if xfce4-settings-manager is installed
+case ${deOpt} in
+    ${desktopEnvs[0]})                      # "XFCE"
+        checkUUID
+        ;;
+    ${desktopEnvs[1]})                      # "Openbox"
+        checkUUID
+        ;;
+esac
+
 
 # setup VNC server
 if [[ -z ${vncPassword} ]]; then
