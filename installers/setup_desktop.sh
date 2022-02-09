@@ -195,32 +195,32 @@ if [[ -z ${desktopMode} ]]; then
     deOpt=""
     select de in ${desktopEnvs[@]}; do
         case ${de} in
-            ${desktopEnvs[0]})                                                         # "XFCE"
-                packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ; break ;;
-            ${desktopEnvs[1]})                                                         # "Openbox"
-                packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]} ; break ;;
-            ${desktopEnvs[2]})                                                         # "LXQt"
-                packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]} ; break ;;
-            ${desktopEnvs[3]})                                                         # "MATE"
-                packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]} ; break ;;
-            ${desktopEnvs[4]})                                                         # "Fluxbox"
-                packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ; break ;;
+            ${desktopEnvs[0]})                                                    # "XFCE"
+                packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ;;
+            ${desktopEnvs[1]})                                                    # "Openbox"
+                packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]} ;;
+            ${desktopEnvs[2]})                                                    # "LXQt"
+                packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]} ;;
+            ${desktopEnvs[3]})                                                    # "MATE"
+                packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]} ;;
+            ${desktopEnvs[4]})                                                    # "Fluxbox"
+                packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ;;
             *)
                 err "invalid option: ${REPLY}" ;;
         esac
     done
 else 
     case ${desktopMode} in
-        ${desktopEnvs[0]})                                                         # "XFCE"
-            packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]} ; break ;;
-        ${desktopEnvs[1]})                                                         # "Openbox"
-            packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]} ; break ;;
-        ${desktopEnvs[2]})                                                         # "LXQt"
-            packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]} ; break ;;
-        ${desktopEnvs[3]})                                                         # "MATE"
-            packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]} ; break ;;
-        ${desktopEnvs[4]})                                                         # "Fluxbox"
-            packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]} ; break ;;
+        ${desktopEnvs[0]})                                                    # "XFCE"
+            packageList+=(${desktopEnvPkgs[0]}) ; deOpt=${desktopEnvs[0]}  ;;
+        ${desktopEnvs[1]})                                                    # "Openbox"
+            packageList+=(${desktopEnvPkgs[1]}) ; deOpt=${desktopEnvs[1]}  ;;
+        ${desktopEnvs[2]})                                                    # "LXQt"
+            packageList+=(${desktopEnvPkgs[2]}) ; deOpt=${desktopEnvs[2]}  ;;
+        ${desktopEnvs[3]})                                                    # "MATE"
+            packageList+=(${desktopEnvPkgs[3]}) ; deOpt=${desktopEnvs[3]}  ;;
+        ${desktopEnvs[4]})                                                    # "Fluxbox"
+            packageList+=(${desktopEnvPkgs[4]}) ; deOpt=${desktopEnvs[4]}  ;;
         *)
             err "invalid option: ${desktopMode}" ;;
     esac
