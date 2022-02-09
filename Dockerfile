@@ -1,4 +1,4 @@
-FROM  xeffyr/termux:latest
+FROM  kcubeterm/termux:latest
 
 # rebuild repo structure as if `tdesktop` was downloaded to ${HOME}
 WORKDIR /data/data/com.termux/files/home/tdesktop/cmd
